@@ -46,6 +46,19 @@
   "Whether or not to use cloc's third-generation language output option."
   :group 'cloc)
 
+(defun cloc-format-command (be-quiet buffers-to-cloc)
+  (shell-command-to-string
+   (apply
+    #'concat
+    (cons
+     (let ((base (if be-quiet "cloc --quiet --csv "
+                   "cloc ")))
+       (if cloc-use-3rd-gen
+           (concat base "--3 ")
+         base))
+     (mapcar (lambda (str) (concat str " "))
+             buffers-to-cloc)))))
+
 (defun cloc-get-output (prefix-given be-quiet &optional regex)
   "This is a helper function to get cloc output for a given set of buffers or
 the current buffer (if PREFIX-GIVEN is non-nil), as desired. BE-QUIET says
@@ -53,47 +66,32 @@ whether to output in CSV format, and REGEX is the optional regex to search
 through file paths with. If used programmatically, be aware that it will query
 for a regex if one is not provided by argument."
   (if (executable-find "cloc")
-      (let
-          ((result
-            (catch 'invalid-regexp
-              (let ((buffers-to-cloc (list (buffer-file-name))))
-                ;; if prefix given, cloc current buffer; don't ask for regex
-                (unless prefix-given
-                  (setq
-                   buffers-to-cloc
-                   (let ((regex-str
-                          (or regex
-                              (read-from-minibuffer "file path regex: "))))
-                     ;; if blank string given, then assume the current file name
-                     ;; was what was intended.
-                     (if (string= regex-str "")
-                         (list (buffer-file-name))
-                       (loop for buf in (buffer-list)
-                             with ret-list = nil
-                             do (let ((name (buffer-file-name buf)))
-                                  (when (and name
-                                             (not
-                                              (string-match-p "^/ssh:" name))
-                                             (string-match-p regex-str name))
-                                    (add-to-list 'ret-list name)))
-                             finally (return ret-list))))))
-                ;; return list so we can tell the difference between an invalid
-                ;; regexp versus a real result, even though the list always has
-                ;; only one element
-                (list
-                 (if buffers-to-cloc
-                     (shell-command-to-string
-                      (apply #'concat
-                             (cons (let ((base
-                                          (if be-quiet
-                                              "cloc --quiet --csv "
-                                            "cloc ")))
-                                     (if cloc-use-3rd-gen
-                                         (concat base "--3 ")
-                                       base))
-                                   (mapcar (lambda (str) (concat str " "))
-                                           buffers-to-cloc))))
-                   "No filenames were found matching regex."))))))
+      (let ((result
+             (catch 'invalid-regexp
+               ;; if prefix given, cloc current buffer; don't ask for regex
+               (let* ((regex-str
+                       (or regex prefix-given
+                           (read-from-minibuffer "file path regex: ")))
+                      (buffers-to-cloc
+                       ;; if blank string given, then assume the current file
+                       ;; name was what was intended.
+                       (if (or prefix-given
+                               (string= regex-str ""))
+                           (list (buffer-file-name))
+                         (remove-if
+                          (lambda (name)
+                            (or (not name)
+                                (string-match-p "^/ssh:" name)
+                                (not (string-match-p regex-str name))))
+                          (mapcar (lambda (buf) (buffer-file-name buf))
+                                  (buffer-list))))))
+                 ;; return list so we can tell the difference between an
+                 ;; invalid regexp versus a real result, even though the
+                 ;; list always has only one element
+                 (list
+                  (if buffers-to-cloc
+                      (cloc-format-command be-quiet buffers-to-cloc)
+                    "No filenames were found matching regex."))))))
         (if (stringp result)
             (concat "regex invalid: " result)
           ;; unlistify the result
