@@ -33,6 +33,10 @@
 ;;; does the same thing, but parses and organizes it all into a list of plists
 ;;; for easier analysis.
 
+;;; Example searches include: "\.cpp$", for all C++ sources files, or "/foo/",
+;;; where "/foo/" is the name of a project directory; cloc will then count all
+;;; code over all open buffers visiting files within the directory named foo.
+
 ;;; Code:
 
 (require 'cl-lib)
@@ -47,6 +51,9 @@
   :group 'cloc)
 
 (defun cloc-format-command (be-quiet buffers-to-cloc)
+  "Format the \"cloc\" command according to BE-QUIET and the defcustom
+CLOC-USE-3RD-GEN, and run the command on the list of strings held in
+BUFFERS-TO-CLOC. Return the command output as a string."
   (shell-command-to-string
    (apply
     #'concat
@@ -58,6 +65,51 @@
          base))
      (mapcar (lambda (str) (concat str " "))
              buffers-to-cloc)))))
+
+(defun cloc-get-extension (filename)
+  "Return the extension of FILENAME (.h, .c, .mp3, etc), if exists, else return
+nil."
+  ;; this doesn't work on filenames with newlines because . doesn't match
+  ;; newlines
+  (let ((match (string-match "\\..+$" filename)))
+    (if match (match-string 0 filename) nil)))
+
+(defun cloc-get-buffers-with-regex (regex-str be-quiet)
+  "Loop through all open buffers for buffers visiting files whose paths match
+REGEX. If the file is not visiting a buffer (or is over a tramp connection), but
+its (buffer-name) matches REGEX, the file is written out to a temporary area. A
+plist is returned, with :files set to a list of the files which correspond to
+open buffers matching REGEX, and :tmp-files set to a list of the files which
+have been created in the temporary area (and which should be destroyed by the
+caller of this function).
+
+BE-QUIET determines whether to return cloc's output as '--quiet --csv', or
+verbose as usual."
+  (loop for buf in (buffer-list)
+        with tramp-regex-str = "^/ssh:"
+        with ret-list = nil
+        with tmp-list = nil
+        do (let ((buf-path (buffer-file-name buf)))
+             ;; if this is a normal file buffer
+             (if (and buf-path
+                  (string-match-p regex-str buf-path)
+                  (not (string-match-p tramp-regex-str buf-path)))
+                 (add-to-list 'ret-list buf-path)
+               ;; if this matches and is tramp buf
+               (when (or (and buf-path (string-match-p regex-str buf-path))
+                         ;; if this does not visit a file but matches regex
+                         (and (not buf-path)
+                              (string-match-p regex-str (buffer-name buf))))
+                 (let ((extension (cloc-get-extension (buffer-name buf))))
+                   ;; if extension is nil, then file is
+                   ;; probs not code, so forget about it
+                   (when extension
+                     (let ((tmp-file (make-temp-file "cloc" nil extension)))
+                       (with-current-buffer buf
+                         (write-region nil nil tmp-file))
+                       (add-to-list 'ret-list tmp-file)
+                       (add-to-list 'tmp-list tmp-file)))))))
+        finally (return (list :files ret-list :tmp-files tmp-list))))
 
 (defun cloc-get-output (prefix-given be-quiet &optional regex)
   "This is a helper function to get cloc output for a given set of buffers or
@@ -78,20 +130,21 @@ for a regex if one is not provided by argument."
                        (if (or prefix-given
                                (string= regex-str ""))
                            (list (buffer-file-name))
-                         (remove-if
-                          (lambda (name)
-                            (or (not name)
-                                (string-match-p "^/ssh:" name)
-                                (not (string-match-p regex-str name))))
-                          (mapcar (lambda (buf) (buffer-file-name buf))
-                                  (buffer-list))))))
-                 ;; return list so we can tell the difference between an
-                 ;; invalid regexp versus a real result, even though the
-                 ;; list always has only one element
-                 (list
-                  (if buffers-to-cloc
-                      (cloc-format-command be-quiet buffers-to-cloc)
-                    "No filenames were found matching regex."))))))
+                         (cloc-get-buffers-with-regex regex-str be-quiet)))
+                      ;; return list so we can tell the difference between an
+                      ;; invalid regexp versus a real result, even though the
+                      ;; list always has only one element
+                      (result-list
+                       (list (if (plist-get buffers-to-cloc :files)
+                                 (cloc-format-command
+                                  be-quiet
+                                  (plist-get buffers-to-cloc :files))
+                               "No filenames were found matching regex."))))
+                 ;; cleanup!
+                 (apply #'call-process
+                        (append (list "rm" nil nil nil)
+                                (plist-get buffers-to-cloc :tmp-files)))
+                 result-list))))
         (if (stringp result)
             (concat "regex invalid: " result)
           ;; unlistify the result
