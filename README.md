@@ -5,8 +5,8 @@ This is a small attempt at cloc integration for Emacs. The functionality is expo
 
 Example searches include:
 
-- "\.cpp$", for all C++ sources files
-- "/foo/", where "/foo/" is the name of a project directory
+- `\.cpp$`, for all C++ sources files
+- `/foo/`, where `"/foo/"` is the name of a project directory
   - cloc will then count all code over all open buffers visiting files within the directory named foo.
 
 # Setup:
