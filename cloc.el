@@ -72,6 +72,8 @@ for a regex if one is not provided by argument."
                              with ret-list = nil
                              do (let ((name (buffer-file-name buf)))
                                   (when (and name
+                                             (not
+                                              (string-match-p "^/ssh:" name))
                                              (string-match-p regex-str name))
                                     (add-to-list 'ret-list name)))
                              finally (return ret-list))))))
