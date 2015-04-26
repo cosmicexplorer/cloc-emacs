@@ -32,15 +32,25 @@
 ;;; does the same thing, but parses and organizes it all into a list of plists
 ;;; for easier analysis.
 
-(require 'cl)
+;;; Code:
+
+(require 'cl-lib)
+
+(defgroup cloc nil
+  "An interface to 'cloc'."
+  :group 'processes
+  :prefix "cloc")
 
 (defcustom cloc-use-3rd-gen t
-  "Whether or not to use cloc's third-generation language output option.")
+  "Whether or not to use cloc's third-generation language output option."
+  :group 'cloc)
 
 (defun cloc-get-output (prefix-given be-quiet &optional regex)
-  "Helper function to get cloc output for a given set of buffers based on regex,
-or the current buffer, as desired. If used programmatically, be aware that it
-will query for a regex if one is not provided by argument."
+  "This is a helper function to get cloc output for a given set of buffers or
+the current buffer (if PREFIX-GIVEN is non-nil), as desired. BE-QUIET says
+whether to output in CSV format, and REGEX is the optional regex to search
+through file paths with. If used programmatically, be aware that it will query
+for a regex if one is not provided by argument."
   (if (executable-find "cloc")
       (let
           ((result
@@ -87,8 +97,15 @@ will query for a regex if one is not provided by argument."
           (car result)))
     "cloc not installed. Download it at http://cloc.sourceforge.net/."))
 
+(defun cloc-get-first-n-of-list (n the-list)
+  "Get first N elements of THE-LIST as another list. 1 <= n <= (length
+the-list)."
+  (loop for item in the-list
+        for x from 1 upto n
+        collect item))
+
 (defun cloc-get-lines-of-str-as-list (str)
-  "Gets and returns lines of string (without ending newline) into a list."
+  "Get and return lines of STR (without ending newline) into a list."
   ;; will add a newline to the end of str if not already there, but removes it
   ;; at bottom
   ;; 10 is newline
@@ -112,11 +129,11 @@ will query for a regex if one is not provided by argument."
                                      (line-end-position)))))
         (if is-final-char-newline
             line-list
-          (get-first-n-of-list (1- (length line-list)) line-list))))))
+          (cloc-get-first-n-of-list (1- (length line-list)) line-list))))))
 
 (defun cloc-get-line-as-plist (line)
-  "Helper function to convert a CSV-formatted line of cloc output into a plist
-representing a cloc analysis."
+  "This is a helper function to convert a CSV-formatted LINE of cloc output into
+a plist representing a cloc analysis."
   (let ((out-plist nil))
     (loop for str-pos from 0 upto (1- (length line))
           with prev-str-pos = 0
@@ -189,8 +206,8 @@ representing a cloc analysis."
 (defun cloc-get-results-as-plists (prefix-given regex)
   "Get output of cloc results as a list of plists. Each plist contains as a
 property the number of files analyzed, the blank lines, the code lines, comment
-lines, etc. for a given language in the range of files tested. If prefix-given
-is set to true, this runs on the current buffer. If not, and a regex is given,
+lines, etc. for a given language in the range of files tested. If PREFIX-GIVEN
+is set to true, this runs on the current buffer. If not, and REGEX is given,
 it will search file-visiting buffers for file paths matching the regex. If the
 regex is nil, it will prompt for a regex; putting in a blank there will default
 to the current buffer."
@@ -205,10 +222,12 @@ to the current buffer."
 ;;;###autoload
 (defun cloc (prefix-given)
   "Run the executable \"cloc\" over file-visiting buffers with pathname
-specified by a regex. If prefix argument or a blank regex is given, the
+specified by a regex. If PREFIX-GIVEN is true or a blank regex is given, the
 current buffer is \"cloc'd\". cloc's entire summary output is given in the
 messages buffer."
   (interactive "P")
   (message (cloc-get-output prefix-given nil)))
 
-(provide 'cloc-emacs)
+(provide 'cloc)
+
+;;; cloc.el ends here
