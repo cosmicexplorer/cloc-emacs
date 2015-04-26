@@ -3,7 +3,11 @@ cloc-emacs
 
 This is a small attempt at cloc integration for Emacs. The functionality is exposed through two functions: `cloc`, an interactive function which performs a search through file-visiting buffers whose filepaths match the given regex (or the current buffer, as desired), and `cloc-get-results-as-plists`, which does the same thing, but parses and organizes it all into a list of plists for easier analysis.
 
-Example searches include: "\.cpp$", for all C++ sources files, or "/foo/", where "/foo/" is the name of a project directory; cloc will then count all code over all open buffers visiting files within the directory named foo.
+Example searches include:
+
+- "\.cpp$", for all C++ sources files
+- "/foo/", where "/foo/" is the name of a project directory
+  - cloc will then count all code over all open buffers visiting files within the directory named foo.
 
 # Setup:
 
