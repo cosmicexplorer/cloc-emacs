@@ -14,7 +14,7 @@ This is a small attempt at cloc integration for Emacs. The functionality is expo
 
 # Usage:
 
-- `M-x cloc`: Interactive function to run the executable "cloc" over file-visiting buffers with pathname specified by a regex. If PREFIX-GIVEN is true or a blank regex is given, the current buffer is "cloc'd". cloc's entire summary output is given in the messages buffer.
+- `M-x cloc`: Interactive function to run the executable "cloc" over file-visiting buffers with pathname specified by a regex. If a prefix argument or a blank regex is given, the current buffer is "cloc'd". cloc's entire summary output is given in the messages buffer.
 
 - `cloc-get-results-as-plists`: Non-interactive function to get output of cloc results as a list of plists. Each plist contains as a property the number of files analyzed, the blank lines, the code lines, comment lines, etc. for a given language in the range of files tested. If PREFIX-GIVEN is set to true, this runs on the current buffer. If not, and REGEX is given, it will search file-visiting buffers for file paths matching the regex. If the regex is nil, it will prompt for a regex; putting in a blank there will default to the current buffer."
 
