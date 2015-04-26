@@ -1,7 +1,7 @@
 cloc-emacs
 ==========
 
-This is a small attempt at cloc integration for Emacs. The functionality is exposed through two functions: cloc, an interactive function which performs a search through file-visiting buffers whose filepaths match the given regex (or the current buffer, as desired), and cloc-get-results-as-plists, which does the same thing, but parses and organizes it all into a list of plists for easier analysis.
+This is a small attempt at cloc integration for Emacs. The functionality is exposed through two functions: `cloc`, an interactive function which performs a search through file-visiting buffers whose filepaths match the given regex (or the current buffer, as desired), and `cloc-get-results-as-plists`, which does the same thing, but parses and organizes it all into a list of plists for easier analysis.
 
 # Setup:
 
