@@ -4,7 +4,7 @@
 
 ;;; Author: Danny McClanahan <danieldmcclanahan@gmail.com>
 ;;; Version: 2015.04.26
-;;; Package-Requires: ((cl-lib "1.0"))
+;;; Package-Requires: ((cl-lib "0.5"))
 ;;; Package-Version: 0.0.0
 ;;; Keywords: cloc, count, source, code, lines
 ;;; URL: https://github.com/cosmicexplorer/cloc-emacs
