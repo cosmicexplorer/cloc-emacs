@@ -1,13 +1,38 @@
-;;; cloc-emacs.el --- count lines of code over emacs buffers
+;;; cloc.el --- count lines of code over emacs buffers
 
 ;;; Copyright 2015 Danny McClanahan
 
 ;;; Author: Danny McClanahan <danieldmcclanahan@gmail.com>
 ;;; Version: 2015.04.26
 ;;; Package-Version: 0.0.0
-;;; URL:
+;;; Keywords: cloc, count, source, code, lines
+;;; URL: https://github.com/cosmicexplorer/cloc-emacs
 
-;;; this file is not part of GNU Emacs
+;;; This file is not part of GNU Emacs
+
+;; This program is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;;; This is a small attempt at cloc integration for Emacs. The functionality is
+;;; exposed through two functions: cloc, an interactive function which performs
+;;; a search through file-visiting buffers whose filepaths match the given regex
+;;; (or the current buffer, as desired), and cloc-get-results-as-plists, which
+;;; does the same thing, but parses and organizes it all into a list of plists
+;;; for easier analysis.
+
+(require 'cl)
 
 (defcustom cloc-use-3rd-gen t
   "Whether or not to use cloc's third-generation language output option.")
@@ -160,6 +185,7 @@ representing a cloc analysis."
                                                       str-pos)))))))
     out-plist))
 
+;;;###autoload
 (defun cloc-get-results-as-plists (prefix-given regex)
   "Get output of cloc results as a list of plists. Each plist contains as a
 property the number of files analyzed, the blank lines, the code lines, comment
@@ -176,6 +202,7 @@ to the current buffer."
               (nthcdr 2 (cloc-get-lines-of-str-as-list
                          (cloc-get-output prefix-given t regex))))))
 
+;;;###autoload
 (defun cloc (prefix-given)
   "Run the executable \"cloc\" over file-visiting buffers with pathname
 specified by a regex. If prefix argument or a blank regex is given, the
