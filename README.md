@@ -11,7 +11,7 @@ Example searches include:
 
 # Setup:
 
-```
+```elisp
 ;; do this only once ever
 (package-install 'cloc)
 ;; put this in your .emacs init file
