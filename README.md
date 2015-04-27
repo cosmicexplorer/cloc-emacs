@@ -5,8 +5,6 @@ This is a small attempt at cloc integration for Emacs. The functionality is expo
 
 cloc will search over all buffers, including those which do not visit files, and tramp buffers, but if the buffer is not visiting a file (and therefore does not have a pathname), cloc will only be able to match the regex to the buffer's buffer-name.
 
-Example searches include: "\.cpp$", for all C++ sources files, or "/foo/", where "/foo/" is the name of a project directory; cloc will then count all code over all open buffers visiting files within a directory named foo.
-
 Example searches include:
 
 - `\.cpp$`, for all C++ sources files
