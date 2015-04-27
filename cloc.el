@@ -9,29 +9,30 @@
 ;;; Keywords: cloc, count, source, code, lines
 ;;; URL: https://github.com/cosmicexplorer/cloc-emacs
 
-;;; This file is not part of GNU Emacs
+;;; This file is not part of GNU Emacs.
 
-;; This program is free software: you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation, either version 3 of the License, or
-;; (at your option) any later version.
+;;; This program is free software: you can redistribute it and/or modify
+;;; it under the terms of the GNU General Public License as published by
+;;; the Free Software Foundation, either version 3 of the License, or
+;;; (at your option) any later version.
 
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
+;;; This program is distributed in the hope that it will be useful,
+;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;; GNU General Public License for more details.
 
-;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;;; You should have received a copy of the GNU General Public License
+;;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
 ;;; This is a small attempt at cloc integration for Emacs. The functionality is
 ;;; exposed through two functions: cloc, an interactive function which performs
-;;; a search through all buffers whose filepaths match the given regex
-;;; (or the current buffer, as desired), and cloc-get-results-as-plists, which
-;;; does the same thing, but parses and organizes it all into a list of plists
-;;; for easier analysis.
+;;; a search through all buffers whose filepaths match the given regex (or the
+;;; current buffer, as desired), and counts lines of code in them. It also
+;;; exposes cloc-get-results-as-plists, a non-interactive function which does
+;;; the same thing, but parses and organizes it all into a list of plists for
+;;; easier analysis.
 
 ;;; cloc will search over all buffers, including those which do not visit files,
 ;;; and tramp buffers, but if the buffer is not visiting a file (and therefore
@@ -41,6 +42,10 @@
 ;;; Example searches include: "\.cpp$", for all C++ sources files, or "/foo/",
 ;;; where "/foo/" is the name of a project directory; cloc will then count all
 ;;; code over all open buffers visiting files within a directory named foo.
+
+;;; Usage:
+
+;;; M-x cloc
 
 ;;; Code:
 
@@ -120,7 +125,8 @@ verbose as usual."
                             (write-region nil nil tmp-file))
                           (add-to-list 'ret-list tmp-file)
                           (add-to-list 'tmp-list tmp-file)))))))
-           finally (return (list :files ret-list :tmp-files tmp-list :is-many t))))
+           finally (return
+                    (list :files ret-list :tmp-files tmp-list :is-many t))))
 
 (defun cloc-get-output (prefix-given be-quiet &optional regex)
   "This is a helper function to get cloc output for a given set of buffers or
@@ -245,11 +251,7 @@ a plist representing a cloc analysis."
                                             (string-to-number
                                              (substring line prev-str-pos
                                                         str-pos))))
-                           (setq cur-prop :3rd-gen-equiv))
-                          (t
-                           (throw
-                            'invalid-property
-                            "cur-prop should never be here! This is a bug.")))
+                           (setq cur-prop :3rd-gen-equiv)))
                     (setq prev-str-pos (1+ str-pos))))
              finally (cond ((eq cur-prop :3rd-gen-equiv)
                             (setq out-plist
