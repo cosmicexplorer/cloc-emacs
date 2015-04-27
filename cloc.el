@@ -92,30 +92,30 @@ this function.
 BE-QUIET determines whether to return cloc's output as '--quiet --csv', or
 verbose as usual."
   (cl-loop for buf in (buffer-list)
-        with tramp-regex-str = "^/ssh:"
-        with ret-list = nil
-        with tmp-list = nil
-        do (let ((buf-path (buffer-file-name buf)))
-             ;; if this is a normal file buffer
-             (if (and buf-path
-                  (string-match-p regex-str buf-path)
-                  (not (string-match-p tramp-regex-str buf-path)))
-                 (add-to-list 'ret-list buf-path)
-               ;; if this matches and is tramp buf
-               (when (or (and buf-path (string-match-p regex-str buf-path))
-                         ;; if this does not visit a file but matches regex
-                         (and (not buf-path)
-                              (string-match-p regex-str (buffer-name buf))))
-                 (let ((extension (cloc-get-extension (buffer-name buf))))
-                   ;; if extension is nil, then file is
-                   ;; probs not code, so forget about it
-                   (when extension
-                     (let ((tmp-file (make-temp-file "cloc" nil extension)))
-                       (with-current-buffer buf
-                         (write-region nil nil tmp-file))
-                       (add-to-list 'ret-list tmp-file)
-                       (add-to-list 'tmp-list tmp-file)))))))
-        finally (return (list :files ret-list :tmp-files tmp-list :is-many t))))
+           with tramp-regex-str = "^/ssh:"
+           with ret-list = nil
+           with tmp-list = nil
+           do (let ((buf-path (buffer-file-name buf)))
+                ;; if this is a normal file buffer
+                (if (and buf-path
+                         (string-match-p regex-str buf-path)
+                         (not (string-match-p tramp-regex-str buf-path)))
+                    (add-to-list 'ret-list buf-path)
+                  ;; if this matches and is tramp buf
+                  (when (or (and buf-path (string-match-p regex-str buf-path))
+                            ;; if this does not visit a file but matches regex
+                            (and (not buf-path)
+                                 (string-match-p regex-str (buffer-name buf))))
+                    (let ((extension (cloc-get-extension (buffer-name buf))))
+                      ;; if extension is nil, then file is
+                      ;; probs not code, so forget about it
+                      (when extension
+                        (let ((tmp-file (make-temp-file "cloc" nil extension)))
+                          (with-current-buffer buf
+                            (write-region nil nil tmp-file))
+                          (add-to-list 'ret-list tmp-file)
+                          (add-to-list 'tmp-list tmp-file)))))))
+           finally (return (list :files ret-list :tmp-files tmp-list :is-many t))))
 
 (defun cloc-get-output (prefix-given be-quiet &optional regex)
   "This is a helper function to get cloc output for a given set of buffers or
@@ -270,7 +270,7 @@ it will search file-visiting buffers for file paths matching the regex. If the
 regex is nil, it will prompt for a regex; putting in a blank there will default
 to the current buffer."
   ;; cdr called here because first line is blank
-  (cl-remove-if #'not                   ; remove nils which sometimes appear fsr
+  (cl-remove-if #'not      ; remove nils which sometimes appear for some reason
                 (mapcar
                  #'cloc-get-line-as-plist
                  ;; first two lines are blank line and csv header, so discard
