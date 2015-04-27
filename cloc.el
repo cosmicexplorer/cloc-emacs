@@ -54,6 +54,8 @@
   "Format the \"cloc\" command according to BE-QUIET and the defcustom
 CLOC-USE-3RD-GEN, and run the command on the list of strings held in
 BUFFERS-TO-CLOC. Return the command output as a string."
+  ;; call-process is cleaner because it doesn't require quotes, but it's more
+  ;; annoying to output it to a string, which is what we want. oh well.
   (shell-command-to-string
    (apply
     #'concat
@@ -63,14 +65,16 @@ BUFFERS-TO-CLOC. Return the command output as a string."
        (if cloc-use-3rd-gen
            (concat base "--3 ")
          base))
-     (mapcar (lambda (str) (concat str " "))
+     (mapcar (lambda (str) (concat "\"" str "\" "))
              buffers-to-cloc)))))
 
 (defun cloc-get-extension (filename)
   "Return the extension of FILENAME (.h, .c, .mp3, etc), if exists, else return
 nil."
-  ;; this doesn't work on filenames with newlines because . doesn't match
-  ;; newlines
+  ;; this doesn't work on filenames with extensions that have newlines in them
+  ;; because . doesn't match newlines; however, if such a file extension were to
+  ;; exist and be standardized, we would have far worse problems than whether an
+  ;; emacs package supports it
   (let ((match (string-match "\\..+$" filename)))
     (if match (match-string 0 filename) nil)))
 
