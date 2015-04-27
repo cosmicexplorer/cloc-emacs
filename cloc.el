@@ -91,7 +91,7 @@ this function.
 
 BE-QUIET determines whether to return cloc's output as '--quiet --csv', or
 verbose as usual."
-  (loop for buf in (buffer-list)
+  (cl-loop for buf in (buffer-list)
         with tramp-regex-str = "^/ssh:"
         with ret-list = nil
         with tmp-list = nil
@@ -158,9 +158,9 @@ your distribution's package manager."))
 (defun cloc-get-first-n-of-list (n the-list)
   "Get first N elements of THE-LIST as another list. 1 <= n <= (length
 the-list)."
-  (loop for item in the-list
-        for x from 1 upto n
-        collect item))
+  (cl-loop for item in the-list
+           for x from 1 upto n
+           collect item))
 
 (defun cloc-get-lines-of-str-as-list (str)
   "Get and return lines of STR (without ending newline) into a list."
@@ -181,10 +181,10 @@ the-list)."
                nil))
         (setq line-list
               (append line-list
-                      (loop while (= 0 (forward-line 1))
-                            collect (buffer-substring-no-properties
-                                     (line-beginning-position)
-                                     (line-end-position)))))
+                      (cl-loop while (= 0 (forward-line 1))
+                               collect (buffer-substring-no-properties
+                                        (line-beginning-position)
+                                        (line-end-position)))))
         (if is-final-char-newline
             line-list
           (cloc-get-first-n-of-list (1- (length line-list)) line-list))))))
@@ -193,71 +193,71 @@ the-list)."
   "This is a helper function to convert a CSV-formatted LINE of cloc output into
 a plist representing a cloc analysis."
   (let ((out-plist nil))
-    (loop for str-pos from 0 upto (1- (length line))
-          with prev-str-pos = 0
-          with cur-prop = :files
-          while (or cloc-use-3rd-gen
-                    (not (eq cur-prop :scale)))
-          do (progn
-               (when (char-equal (aref line str-pos) 44) ;  44 is comma
-                 (cond ((eq cur-prop :files)
-                        (setq out-plist
-                              (plist-put out-plist :files
-                                         (string-to-number
-                                          (substring line prev-str-pos
-                                                     str-pos))))
-                        (setq cur-prop :language))
-                       ((eq cur-prop :language)
-                        (setq out-plist
-                              (plist-put out-plist :language
-                                         (substring line prev-str-pos
-                                                    str-pos)))
-                        (setq cur-prop :blank))
-                       ((eq cur-prop :blank)
-                        (setq out-plist
-                              (plist-put out-plist :blank
-                                         (string-to-number
-                                          (substring line prev-str-pos
-                                                     str-pos))))
-                        (setq cur-prop :comment))
-                       ((eq cur-prop :comment)
-                        (setq out-plist
-                              (plist-put out-plist :comment
-                                         (string-to-number
-                                          (substring line prev-str-pos
-                                                     str-pos))))
-                        (setq cur-prop :code))
-                       ((eq cur-prop :code)
-                        (setq out-plist
-                              (plist-put out-plist :code
-                                         (string-to-number
-                                          (substring line prev-str-pos
-                                                     str-pos))))
-                        (setq cur-prop :scale))
-                       ((eq cur-prop :scale)
-                        (setq out-plist
-                              (plist-put out-plist :scale
-                                         (string-to-number
-                                          (substring line prev-str-pos
-                                                     str-pos))))
-                        (setq cur-prop :3rd-gen-equiv))
-                       (t
-                        (throw
-                         'invalid-property
-                         "cur-prop should never be here! This is a bug.")))
-                 (setq prev-str-pos (1+ str-pos))))
-          finally (cond ((eq cur-prop :3rd-gen-equiv)
-                         (setq out-plist
-                               (plist-put out-plist :3rd-gen-equiv
-                                          (string-to-number
-                                           (substring line prev-str-pos
-                                                      str-pos)))))
-                        ((eq cur-prop :code)
-                         (setq out-plist
-                               (plist-put out-plist :code
-                                          (string-to-number
-                                           (substring line prev-str-pos
-                                                      str-pos)))))))
+    (cl-loop for str-pos from 0 upto (1- (length line))
+             with prev-str-pos = 0
+             with cur-prop = :files
+             while (or cloc-use-3rd-gen
+                       (not (eq cur-prop :scale)))
+             do (progn
+                  (when (char-equal (aref line str-pos) 44) ;  44 is comma
+                    (cond ((eq cur-prop :files)
+                           (setq out-plist
+                                 (plist-put out-plist :files
+                                            (string-to-number
+                                             (substring line prev-str-pos
+                                                        str-pos))))
+                           (setq cur-prop :language))
+                          ((eq cur-prop :language)
+                           (setq out-plist
+                                 (plist-put out-plist :language
+                                            (substring line prev-str-pos
+                                                       str-pos)))
+                           (setq cur-prop :blank))
+                          ((eq cur-prop :blank)
+                           (setq out-plist
+                                 (plist-put out-plist :blank
+                                            (string-to-number
+                                             (substring line prev-str-pos
+                                                        str-pos))))
+                           (setq cur-prop :comment))
+                          ((eq cur-prop :comment)
+                           (setq out-plist
+                                 (plist-put out-plist :comment
+                                            (string-to-number
+                                             (substring line prev-str-pos
+                                                        str-pos))))
+                           (setq cur-prop :code))
+                          ((eq cur-prop :code)
+                           (setq out-plist
+                                 (plist-put out-plist :code
+                                            (string-to-number
+                                             (substring line prev-str-pos
+                                                        str-pos))))
+                           (setq cur-prop :scale))
+                          ((eq cur-prop :scale)
+                           (setq out-plist
+                                 (plist-put out-plist :scale
+                                            (string-to-number
+                                             (substring line prev-str-pos
+                                                        str-pos))))
+                           (setq cur-prop :3rd-gen-equiv))
+                          (t
+                           (throw
+                            'invalid-property
+                            "cur-prop should never be here! This is a bug.")))
+                    (setq prev-str-pos (1+ str-pos))))
+             finally (cond ((eq cur-prop :3rd-gen-equiv)
+                            (setq out-plist
+                                  (plist-put out-plist :3rd-gen-equiv
+                                             (string-to-number
+                                              (substring line prev-str-pos
+                                                         str-pos)))))
+                           ((eq cur-prop :code)
+                            (setq out-plist
+                                  (plist-put out-plist :code
+                                             (string-to-number
+                                              (substring line prev-str-pos
+                                                         str-pos)))))))
     out-plist))
 
 ;;;###autoload
@@ -270,12 +270,12 @@ it will search file-visiting buffers for file paths matching the regex. If the
 regex is nil, it will prompt for a regex; putting in a blank there will default
 to the current buffer."
   ;; cdr called here because first line is blank
-  (remove-if #'not                      ; remove nils which sometimes appear fsr
-             (mapcar
-              #'cloc-get-line-as-plist
-              ;; first two lines are blank line and csv header, so discard
-              (nthcdr 2 (cloc-get-lines-of-str-as-list
-                         (cloc-get-output prefix-given t regex))))))
+  (cl-remove-if #'not                   ; remove nils which sometimes appear fsr
+                (mapcar
+                 #'cloc-get-line-as-plist
+                 ;; first two lines are blank line and csv header, so discard
+                 (nthcdr 2 (cloc-get-lines-of-str-as-list
+                            (cloc-get-output prefix-given t regex))))))
 
 ;;;###autoload
 (defun cloc (prefix-given)
