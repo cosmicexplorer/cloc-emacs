@@ -276,7 +276,6 @@ is set to true, this runs on the current buffer. If not, and REGEX is given,
 it will search file-visiting buffers for file paths matching the regex. If the
 regex is nil, it will prompt for a regex; putting in a blank there will default
 to the current buffer."
-  ;; cdr called here because first line is blank
   (cl-remove-if #'not      ; remove nils which sometimes appear for some reason
                 (mapcar
                  #'cloc-get-line-as-plist
