@@ -7,7 +7,7 @@ cloc will search over all buffers, including those which do not visit files, and
 
 Example searches include:
 
-- `\.cpp$`, for all C++ sources files
+- `\.cpp$`, for all C++ source files
 - `/foo/`, where `"/foo/"` is the name of a project directory
   - cloc will then count all code over all open buffers visiting files within a directory named foo.
 
