@@ -56,7 +56,7 @@
   :group 'processes
   :prefix "cloc")
 
-(defcustom cloc-use-3rd-gen t
+(defcustom cloc-use-3rd-gen nil
   "Whether or not to use cloc's third-generation language output option."
   :group 'cloc)
 
