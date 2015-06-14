@@ -290,7 +290,7 @@ specified by a regex. If PREFIX-GIVEN is true or a blank regex is given, the
 current buffer is \"cloc'd\". cloc's entire summary output is given in the
 messages buffer."
   (interactive "P")
-  (message (cloc-get-output prefix-given nil)))
+  (message "%s" (cloc-get-output prefix-given nil)))
 
 (provide 'cloc)
 
