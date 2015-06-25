@@ -1,6 +1,8 @@
 cloc-emacs
 ==========
 
+[![melpa badge][melpa-badge]][melpa-link] [![melpa stable badge][melpa-stable-badge]][melpa-stable-link]
+
 This is a small attempt at cloc integration for Emacs. The functionality is exposed through two functions: `cloc`, an interactive function which performs a search through all buffers whose filepaths match the given regex (or the current buffer, as desired), and counts lines of code in them. It also exposes `cloc-get-results-as-plists`, a non-interactive function which does the same thing, but parses and organizes it all into a list of plists for easier analysis.
 
 cloc will search over all buffers, including those which do not visit files, and tramp buffers, but if the buffer is not visiting a file (and therefore does not have a pathname), cloc will only be able to match the regex to the buffer's buffer-name.
@@ -29,3 +31,8 @@ Example searches include:
 # Screenshot:
 
 ![cloc example usage](doc/cloc-screenshot.png)
+
+[melpa-link]: http://melpa.org/#/cloc
+[melpa-stable-link]: http://stable.melpa.org/#/cloc
+[melpa-badge]: http://melpa.org/packages/cloc-badge.svg
+[melpa-stable-badge]: http://stable.melpa.org/packages/cloc-badge.svg
