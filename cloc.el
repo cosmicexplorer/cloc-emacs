@@ -1,51 +1,66 @@
 ;;; cloc.el --- count lines of code over emacs buffers
 
-;;; Copyright 2015 Danny McClanahan
+;; Copyright 2015 Danny McClanahan
 
-;;; Author: Danny McClanahan <danieldmcclanahan@gmail.com>
-;;; Version: 2015.04.26
-;;; Package-Requires: ((cl-lib "0.5"))
-;;; Package-Version: 0.0.0
-;;; Keywords: cloc, count, source, code, lines
-;;; URL: https://github.com/cosmicexplorer/cloc-emacs
+;; Author: Danny McClanahan <danieldmcclanahan@gmail.com>
+;; Version: 2015.04.26
+;; Package-Requires: ((cl-lib "0.5"))
+;; Package-Version: 0.0.0
+;; Keywords: cloc, count, source, code, lines
+;; URL: https://github.com/cosmicexplorer/cloc-emacs
 
-;;; This file is not part of GNU Emacs.
+;; This file is not part of GNU Emacs.
 
-;;; This program is free software: you can redistribute it and/or modify
-;;; it under the terms of the GNU General Public License as published by
-;;; the Free Software Foundation, either version 3 of the License, or
-;;; (at your option) any later version.
+;; This program is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;;; This program is distributed in the hope that it will be useful,
-;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;;; GNU General Public License for more details.
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
-;;; You should have received a copy of the GNU General Public License
-;;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
-;;; This is a small attempt at cloc integration for Emacs. The functionality is
-;;; exposed through two functions: cloc, an interactive function which performs
-;;; a search through all buffers whose filepaths match the given regex (or the
-;;; current buffer, as desired), and counts lines of code in them. It also
-;;; exposes cloc-get-results-as-plists, a non-interactive function which does
-;;; the same thing, but parses and organizes it all into a list of plists for
-;;; easier analysis.
+;; This is a small attempt at cloc integration for Emacs. The functionality is
+;; exposed through two functions: cloc, an interactive function which performs
+;; a search through all buffers whose filepaths match the given regex (or the
+;; current buffer, as desired), and counts lines of code in them. It also
+;; exposes cloc-get-results-as-plists, a non-interactive function which does
+;; the same thing, but parses and organizes it all into a list of plists for
+;; easier analysis.
 
-;;; cloc will search over all buffers, including those which do not visit files,
-;;; and tramp buffers, but if the buffer is not visiting a file (and therefore
-;;; does not have a pathname), cloc will only be able to match the regex to the
-;;; buffer's buffer-name.
+;; cloc will search over all buffers, including those which do not visit files,
+;; and tramp buffers, but if the buffer is not visiting a file (and therefore
+;; does not have a pathname), cloc will only be able to match the regex to the
+;; buffer's buffer-name.
 
-;;; Example searches include: "\.cpp$", for all C++ sources files, or "/foo/",
-;;; where "/foo/" is the name of a project directory; cloc will then count all
-;;; code over all open buffers visiting files within a directory named foo.
+;; Example searches include: "\.cpp$", for all C++ sources files, or "/foo/",
+;; where "/foo/" is the name of a project directory; cloc will then count all
+;; code over all open buffers visiting files within a directory named foo.
 
 ;;; Usage:
 
-;;; M-x cloc
+;; M-x `cloc'
+;; - Interactive function to run the executable "cloc" over all buffers with
+;; pathname specified by a regex.
+;; - If a prefix argument or a blank regex is given, the current buffer is
+;; "cloc'd".
+;; - cloc's entire summary output is given in the messages buffer.
+
+;; ESC-: `cloc-get-results-as-plists`
+;; - Non-interactive function to get output of cloc results as a list of plists.
+;; - Each plist contains as a property the number of files analyzed, the blank
+;; lines, the code lines, comment lines, etc. for a given language in the range
+;; of files tested.
+;; - If prefix-given is set to true, this runs on the current buffer. If not,
+;; and a regex is given, it will search file-visiting buffers for file paths
+;; matching the regex. If the regex is nil, it will prompt for a regex; putting
+;; in a blank there will default to the current buffer.
 
 ;;; Code:
 

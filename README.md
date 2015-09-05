@@ -16,17 +16,20 @@ Example searches include:
 # Setup:
 
 ```elisp
-;; do this only once ever
 (package-install 'cloc)
-;; put this in your .emacs init file
-(require 'cloc)
 ```
+
+You should only need to do this once.
 
 # Usage:
 
 - `M-x cloc`: Interactive function to run the executable "cloc" over all buffers with pathname specified by a regex. If a prefix argument or a blank regex is given, the current buffer is "cloc'd". cloc's entire summary output is given in the messages buffer.
 
 - `cloc-get-results-as-plists`: Non-interactive function to get output of cloc results as a list of plists. Each plist contains as a property the number of files analyzed, the blank lines, the code lines, comment lines, etc. for a given language in the range of files tested. If prefix-given is set to true, this runs on the current buffer. If not, and a regex is given, it will search file-visiting buffers for file paths matching the regex. If the regex is nil, it will prompt for a regex; putting in a blank there will default to the current buffer.
+
+# Customization
+
+- `cloc-use-3rd-gen`: when non-nil, includes the [somewhat controversial](http://cloc.sourceforge.net/#scale_factors) "3rd generation" language counting option on the cloc executable. Can be let-bound dynamically if you wish to turn this on temporarily.
 
 # Screenshot:
 
