@@ -182,38 +182,11 @@ for a regex if one is not provided by argument."
 your distribution's package manager."))
 
 (defun cloc-get-first-n-of-list (n the-list)
-  "Get first N elements of THE-LIST as another list. 1 <= n <= (length
-the-list)."
+  "Get first N elements of THE-LIST as another list.
+1 <= n <= (length THE-LIST)."
   (cl-loop for item in the-list
            for x from 1 upto n
            collect item))
-
-(defun cloc-get-lines-of-str-as-list (str)
-  "Get and return lines of STR (without ending newline) into a list."
-  ;; will add a newline to the end of str if not already there, but removes it
-  ;; at bottom
-  ;; 10 is newline
-  (let ((is-final-char-newline (char-equal (aref str (1- (length str))) 10)))
-    (unless is-final-char-newline
-      (setq str (concat str "\n")))
-    (with-temp-buffer
-      (insert str)
-      (goto-char (point-min))
-      (let ((line-list nil))
-        (setq line-list
-              (cons
-               (buffer-substring-no-properties
-                (line-beginning-position) (line-end-position))
-               nil))
-        (setq line-list
-              (append line-list
-                      (cl-loop while (= 0 (forward-line 1))
-                               collect (buffer-substring-no-properties
-                                        (line-beginning-position)
-                                        (line-end-position)))))
-        (if is-final-char-newline
-            line-list
-          (cloc-get-first-n-of-list (1- (length line-list)) line-list))))))
 
 (defun cloc-get-line-as-plist (line)
   "This is a helper function to convert a CSV-formatted LINE of cloc output into
@@ -283,7 +256,7 @@ a plist representing a cloc analysis."
     out-plist))
 
 ;;;###autoload
-(defun cloc-get-results-as-plists (prefix-given regex)
+(defun cloc-get-results-as-plists (prefix-given &optional regex)
   "Get output of cloc results as a list of plists. Each plist contains as a
 property the number of files analyzed, the blank lines, the code lines, comment
 lines, etc. for a given language in the range of files tested. If PREFIX-GIVEN
@@ -291,12 +264,12 @@ is set to true, this runs on the current buffer. If not, and REGEX is given,
 it will search file-visiting buffers for file paths matching the regex. If the
 regex is nil, it will prompt for a regex; putting in a blank there will default
 to the current buffer."
-  (cl-remove-if #'not      ; remove nils which sometimes appear for some reason
-                (mapcar
-                 #'cloc-get-line-as-plist
-                 ;; first two lines are blank line and csv header, so discard
-                 (nthcdr 2 (cloc-get-lines-of-str-as-list
-                            (cloc-get-output prefix-given t regex))))))
+  (cl-remove-if
+   #'not      ; remove nils which sometimes appear for some reason
+   (mapcar
+    #'cloc-get-line-as-plist
+    ;; first two lines are blank line and csv header, so discard
+    (nthcdr 2 (split-string (cloc-get-output prefix-given t regex) "\n")))))
 
 ;;;###autoload
 (defun cloc (prefix-given)
