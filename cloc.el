@@ -90,7 +90,7 @@ BUFFERS-TO-CLOC. Return the command output as a string."
           (concat base "--3 ")
         base))
     (if (eq bufs-to-cloc t) (list "--stdin-name=" (buffer-name) " -")
-      (mapcar (lambda (str) (concat "\"" str "\" "))
+      (cl-mapcar (lambda (str) (concat "\"" str "\" "))
               bufs-to-cloc)))))
 
 (defun cloc-get-extension (filename)
@@ -183,7 +183,7 @@ for a regex if one is not provided by argument."
                        (cloc-format-command be-quiet cloc-bufs-list))
                     "No filenames were found matching regex."))))
           ;; cleanup!
-          (mapcan (lambda (f) (delete-file f))
+          (cl-mapcan (lambda (f) (delete-file f))
                   (plist-get buffers-to-cloc :tmp-files))
           result-into-list))
     "cloc not installed. Download it at http://cloc.sourceforge.net/ or through
@@ -274,7 +274,7 @@ regex is nil, it will prompt for a regex; putting in a blank there will default
 to the current buffer."
   (cl-remove-if
    #'not      ; remove nils which sometimes appear for some reason
-   (mapcar
+   (cl-mapcar
     #'cloc-get-line-as-plist
     ;; first two lines are blank line and csv header, so discard
     (nthcdr 2 (split-string (cloc-get-output prefix-given t regex) "\n")))))
