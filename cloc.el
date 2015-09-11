@@ -94,13 +94,8 @@ BUFFERS-TO-CLOC. Return the command output as a string."
               bufs-to-cloc)))))
 
 (defun cloc-get-extension (filename)
-  "Return the extension of FILENAME (.h, .c, .mp3, etc), if exists, else return
-nil."
-  ;; this doesn't work on filenames with extensions that have newlines in them
-  ;; because . doesn't match newlines; however, if such a file extension were to
-  ;; exist and be standardized, we would have far worse problems than whether an
-  ;; emacs package supports it
-  (let ((match (string-match "\\..+$" filename)))
+  "Return the extension of FILENAME (.h, .c, .mp3, etc), else return nil."
+  (let ((match (string-match "\\.[^\\.]+\\'" filename)))
     (if match (match-string 0 filename) nil)))
 
 (defun cloc-get-buffers-with-regex (regex-str be-quiet)
