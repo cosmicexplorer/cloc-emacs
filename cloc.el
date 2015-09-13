@@ -98,7 +98,30 @@ BUFFERS-TO-CLOC. Return the command output as a string."
   (let ((match (string-match "\\.[^\\.]+\\'" filename)))
     (if match (match-string 0 filename) nil)))
 
-(defun cloc-get-buffers-with-regex (regex-str be-quiet)
+(defconst cloc-tramp-regex-str "^/ssh:"
+  "Regex matching tramp buffers over ssh.")
+
+(defun cloc-is-tramp-or-virtual-file (regex buf)
+  "Determine whether buffer BUF corresponds with virtual file matching REGEX."
+  (let ((buf-path (buffer-file-name buf)))
+    (and
+     (not (string= (substring (buffer-name buf) 0 1) " "))
+     (or (and
+          (not buf-path)
+          (string-match-p regex (buffer-name buf)))
+         (and
+          buf-path
+          (string-match-p regex buf-path)
+          (string-match-p cloc-tramp-regex-str buf-path))))))
+
+(defun cloc-is-real-file (regex buf)
+  "Determine whether buffer BUF corresponds with real file matching REGEX."
+  (let ((buf-path (buffer-file-name buf)))
+    (and buf-path
+         (string-match-p regex buf-path)
+         (not (string-match-p cloc-tramp-regex-str buf-path)))))
+
+(defun cloc-get-buffers-with-regex (regex-str)
   "Loop through all open buffers for buffers visiting files whose paths match
 REGEX. If the file is not visiting a buffer (or is over a tramp connection), but
 its (buffer-name) matches REGEX, the file is written out to a temporary area. A
@@ -107,34 +130,20 @@ open buffers matching REGEX, and :tmp-files set to a list of the files which
 have been created in the temporary area (and which should be destroyed by the
 caller of this function). An additional property :is-many is always set to t on
 the returned list so that a caller can determine whether a list was produced by
-this function.
-
-BE-QUIET determines whether to return cloc's output as '--quiet --csv', or
-verbose as usual."
+this function."
   (cl-loop for buf in (buffer-list)
-           with tramp-regex-str = "^/ssh:"
            with ret-list = nil
            with tmp-list = nil
-           do (let ((buf-path (buffer-file-name buf)))
-                ;; if this is a normal file buffer
-                (if (and buf-path
-                         (string-match-p regex-str buf-path)
-                         (not (string-match-p tramp-regex-str buf-path)))
-                    (add-to-list 'ret-list buf-path)
-                  ;; if this matches and is tramp buf
-                  (when (or (and buf-path (string-match-p regex-str buf-path))
-                            ;; if this does not visit a file but matches regex
-                            (and (not buf-path)
-                                 (string-match-p regex-str (buffer-name buf))))
-                    (let ((extension (cloc-get-extension (buffer-name buf))))
-                      ;; if extension is nil, then file is
-                      ;; probs not code, so forget about it
-                      (when extension
-                        (let ((tmp-file (make-temp-file "cloc" nil extension)))
-                          (with-current-buffer buf
-                            (write-region nil nil tmp-file))
-                          (add-to-list 'ret-list tmp-file)
-                          (add-to-list 'tmp-list tmp-file)))))))
+           do (cond
+               ((cloc-is-real-file regex-str buf)
+                (add-to-list 'ret-list (buffer-file-name buf)))
+               ((cloc-is-tramp-or-virtual-file regex-str buf)
+                (let* ((extension (cloc-get-extension (buffer-name buf)))
+                       (tmp-file (make-temp-file "cloc" nil extension)))
+                  (with-current-buffer buf
+                    (write-region nil nil tmp-file))
+                  (add-to-list 'ret-list tmp-file)
+                  (add-to-list 'tmp-list tmp-file))))
            finally (return
                     (list :files ret-list :tmp-files tmp-list :is-many t))))
 
@@ -163,7 +172,7 @@ for a regex if one is not provided by argument."
                 ;; name was what was intended.
                 (if (string= regex-str "")
                     (list (buffer-file-name))
-                  (cloc-get-buffers-with-regex regex-str be-quiet)))
+                  (cloc-get-buffers-with-regex regex-str)))
                ;; return list so we can tell the difference between an
                ;; invalid regexp versus a real result, even though the
                ;; list always has only one element
@@ -179,7 +188,7 @@ for a regex if one is not provided by argument."
                     "No filenames were found matching regex."))))
           ;; cleanup!
           (cl-mapcan (lambda (f) (delete-file f))
-                  (plist-get buffers-to-cloc :tmp-files))
+                     (plist-get buffers-to-cloc :tmp-files))
           result-into-list))
     "cloc not installed. Download it at http://cloc.sourceforge.net/ or through
 your distribution's package manager."))
