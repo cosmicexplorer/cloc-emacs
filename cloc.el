@@ -75,23 +75,19 @@
   "Whether or not to use cloc's third-generation language output option."
   :group 'cloc)
 
+(defcustom cloc-executable-location (executable-find "cloc")
+  "Location of cloc executable."
+  :group 'cloc)
+
 (defun cloc-format-command (be-quiet bufs-to-cloc)
   "Format the \"cloc\" command according to BE-QUIET and the defcustom
 CLOC-USE-3RD-GEN, and run the command on the list of strings held in
 BUFFERS-TO-CLOC. Return the command output as a string."
-  ;; call-process is cleaner because it doesn't require quotes, but it's more
-  ;; annoying to output it to a string, which is what we want. oh well.
-  (apply
-   #'concat
-   (cons
-    (let ((base (if be-quiet "cloc --quiet --csv "
-                  "cloc ")))
-      (if cloc-use-3rd-gen
-          (concat base "--3 ")
-        base))
-    (if (eq bufs-to-cloc t) (list "--stdin-name=" (buffer-name) " -")
-      (cl-mapcar (lambda (str) (concat "\"" str "\" "))
-              bufs-to-cloc)))))
+  (append
+   (when be-quiet (list "--quiet" "--csv"))
+   (when cloc-use-3rd-gen (list "--3"))
+   (if (eq bufs-to-cloc t) (list (concat "--stdin-name=" (buffer-name)) "-")
+     bufs-to-cloc)))
 
 (defun cloc-get-extension (filename)
   "Return the extension of FILENAME (.h, .c, .mp3, etc), else return nil."
@@ -147,22 +143,28 @@ this function."
            finally (return
                     (list :files ret-list :tmp-files tmp-list :is-many t))))
 
+(defconst cloc-url "https://cloc.sourceforge.net"
+  "Url pointing to cloc's project page.")
+
 (defun cloc-get-output (prefix-given be-quiet &optional regex)
   "This is a helper function to get cloc output for a given set of buffers or
 the current buffer (if PREFIX-GIVEN is non-nil), as desired. BE-QUIET says
 whether to output in CSV format, and REGEX is the optional regex to search
 through file paths with. If used programmatically, be aware that it will query
 for a regex if one is not provided by argument."
-  (if (executable-find "cloc")
+  (if cloc-executable-location
       (if prefix-given
           ;; if prefix given, send current buffer to cloc by stdin
           (let ((cur-buf (current-buffer)))
             (with-temp-buffer
               (let ((tmp-buf (current-buffer)))
                 (with-current-buffer cur-buf
-                  (shell-command-on-region
-                   (point-min) (point-max) (cloc-format-command be-quiet t)
-                   tmp-buf)))
+                  (apply
+                   #'call-process-region
+                   (append
+                    (list (point-min) (point-max) cloc-executable-location
+                          nil tmp-buf nil)
+                    (cloc-format-command be-quiet t)))))
               (buffer-string)))
         ;; if prefix given, cloc current buffer; don't ask for regex
         (let* ((regex-str
@@ -183,15 +185,18 @@ for a regex if one is not provided by argument."
                            buffers-to-cloc
                          (plist-get buffers-to-cloc :files))))
                   (if cloc-bufs-list
-                      (shell-command-to-string
-                       (cloc-format-command be-quiet cloc-bufs-list))
+                      (with-temp-buffer
+                        (apply
+                         #'call-process cloc-executable-location nil t nil
+                         (cloc-format-command be-quiet cloc-bufs-list))
+                        (buffer-string))
                     "No filenames were found matching regex."))))
           ;; cleanup!
           (cl-mapcan (lambda (f) (delete-file f))
                      (plist-get buffers-to-cloc :tmp-files))
           result-into-list))
-    "cloc not installed. Download it at http://cloc.sourceforge.net/ or through
-your distribution's package manager."))
+    (concat "cloc not installed. Download it at " cloc-url " or through your
+distribution's package manager.")))
 
 (defun cloc-get-first-n-of-list (n the-list)
   "Get first N elements of THE-LIST as another list.
