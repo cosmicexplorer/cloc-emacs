@@ -3,7 +3,7 @@
 ;; Copyright 2015 Danny McClanahan
 
 ;; Author: Danny McClanahan <danieldmcclanahan@gmail.com>
-;; Version: 2015.04.26
+;; Version: 2015.09.12
 ;; Package-Requires: ((cl-lib "0.5"))
 ;; Package-Version: 0.0.0
 ;; Keywords: cloc, count, source, code, lines
