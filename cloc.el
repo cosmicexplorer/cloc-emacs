@@ -288,6 +288,9 @@ to the current buffer."
     ;; first two lines are blank line and csv header, so discard
     (nthcdr 2 (split-string (cloc-get-output prefix-given t regex) "\n")))))
 
+(defun cloc-remove-carriage-return (str)
+  (replace-regexp-in-string "" "" str))
+
 ;;;###autoload
 (defun cloc (prefix-given)
   "Run the executable \"cloc\" over file-visiting buffers with pathname
@@ -295,7 +298,8 @@ specified by a regex. If PREFIX-GIVEN is true or a blank regex is given, the
 current buffer is \"cloc'd\". cloc's entire summary output is given in the
 messages buffer."
   (interactive "P")
-  (message "%s" (cloc-get-output prefix-given nil)))
+  (message
+   "%s" (cloc-remove-carriage-return (cloc-get-output prefix-given nil))))
 
 (provide 'cloc)
 
