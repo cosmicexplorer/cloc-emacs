@@ -3,7 +3,9 @@ cloc-emacs
 
 [![melpa badge][melpa-badge]][melpa-link]
 
-This is a small attempt at cloc integration for Emacs. The functionality is exposed through two functions: `cloc`, an interactive function which performs a search through all buffers whose filepaths match the given regex (or the current buffer, as desired), and counts lines of code in them. It also exposes `cloc-get-results-as-plists`, a non-interactive function which does the same thing, but parses and organizes it all into a list of plists for easier analysis.
+![cloc example usage](doc/cloc-screenshot.png)
+
+This is a small attempt at [cloc](http://cloc.sourceforge.net) integration for Emacs. The functionality is exposed through two functions: `cloc`, an interactive function which performs a search through all buffers whose filepaths match the given regex (or the current buffer, as desired), and counts lines of code in them. It also exposes `cloc-get-results-as-plists`, a non-interactive function which does the same thing, but parses and organizes it all into a list of plists for easier analysis.
 
 cloc will search over all buffers, including those which do not visit files, and tramp buffers, but if the buffer is not visiting a file (and therefore does not have a pathname), cloc will only be able to match the regex to the buffer's buffer-name.
 
@@ -30,10 +32,6 @@ You should only need to do this once.
 # Customization
 
 - `cloc-use-3rd-gen`: when non-nil, includes the [somewhat controversial](http://cloc.sourceforge.net/#scale_factors) "3rd generation" language counting option on the cloc executable. Can be let-bound dynamically if you wish to turn this on temporarily.
-
-# Screenshot:
-
-![cloc example usage](doc/cloc-screenshot.png)
 
 [melpa-link]: http://melpa.org/#/cloc
 [melpa-badge]: http://melpa.org/packages/cloc-badge.svg
