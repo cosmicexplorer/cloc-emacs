@@ -146,6 +146,15 @@ this function."
 (defconst cloc-url "https://cloc.sourceforge.net"
   "Url pointing to cloc's project page.")
 
+(defmacro cloc-get-temp-buffer-ref (tmp-buf-name body-in-cur body-in-tmp)
+  (let ((cur-buf-sym (cl-gensym)))
+    `(let ((,cur-buf-sym (current-buffer)))
+       (with-temp-buffer
+         (let ((,tmp-buf-name (current-buffer)))
+           (with-current-buffer ,cur-buf-sym ,body-in-cur))
+         ,body-in-tmp))))
+(put 'cloc-get-temp-buffer-ref 'lisp-indent-function 1)
+
 (defun cloc-get-output (prefix-given be-quiet &optional regex)
   "This is a helper function to get cloc output for a given set of buffers or
 the current buffer (if PREFIX-GIVEN is non-nil), as desired. BE-QUIET says
@@ -155,17 +164,14 @@ for a regex if one is not provided by argument."
   (if cloc-executable-location
       (if prefix-given
           ;; if prefix given, send current buffer to cloc by stdin
-          (let ((cur-buf (current-buffer)))
-            (with-temp-buffer
-              (let ((tmp-buf (current-buffer)))
-                (with-current-buffer cur-buf
-                  (apply
-                   #'call-process-region
-                   (append
-                    (list (point-min) (point-max) cloc-executable-location
-                          nil tmp-buf nil)
-                    (cloc-format-command be-quiet t)))))
-              (buffer-string)))
+          (cloc-get-temp-buffer-ref tmp-buf
+            (apply
+              #'call-process-region
+              (append
+               (list (point-min) (point-max) cloc-executable-location
+                     nil tmp-buf nil)
+               (cloc-format-command be-quiet t)))
+            (buffer-string))
         ;; if prefix given, cloc current buffer; don't ask for regex
         (let* ((regex-str
                 (or regex (read-regexp "file path regex: ")))
