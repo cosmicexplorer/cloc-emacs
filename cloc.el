@@ -52,7 +52,7 @@
 ;; "cloc'd".
 ;; - cloc's entire summary output is given in the messages buffer.
 
-;; ESC-: `cloc-get-results-as-plists`
+;; ESC-: `cloc-get-results-as-plists'
 ;; - Non-interactive function to get output of cloc results as a list of plists.
 ;; - Each plist contains as a property the number of files analyzed, the blank
 ;; lines, the code lines, comment lines, etc. for a given language in the range
