@@ -31,7 +31,7 @@ You should only need to do this once.
 
 # Customization
 
-- `cloc-use-3rd-gen`: when non-nil, includes the [somewhat controversial](http://cloc.sourceforge.net/#scale_factors) "3rd generation" language counting option on the cloc executable. Can be let-bound dynamically if you wish to turn this on temporarily.
+- `cloc-use-3rd-gen`: when non-nil, includes the [somewhat controversial](https://github.com/AlDanial/cloc#scale_factors) "3rd generation" language counting option on the cloc executable. Can be let-bound dynamically if you wish to turn this on temporarily.
 
 [melpa-link]: http://melpa.org/#/cloc
 [melpa-badge]: http://melpa.org/packages/cloc-badge.svg
