@@ -35,3 +35,7 @@ You should only need to do this once.
 
 [melpa-link]: http://melpa.org/#/cloc
 [melpa-badge]: http://melpa.org/packages/cloc-badge.svg
+
+# License
+
+[GPL 3.0+](./LICENSE)
